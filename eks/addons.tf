@@ -1,6 +1,6 @@
 module "eks_blueprints_addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "~> 1.16.2"
+  version = "~> 1.22.0"
 
   depends_on = [module.eks]
 
