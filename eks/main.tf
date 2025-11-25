@@ -6,8 +6,38 @@ locals {
   subnets         = var.enable_nat_gateway ? module.vpc.private_subnets : module.vpc.public_subnets
   subnets_by_zone = { for _, subnet in data.aws_subnet.subnets : subnet.availability_zone => subnet.id }
 
+  # ARM-based instance type prefixes (Graviton processors)
+  # Comprehensive list of all AWS Graviton instance families (Graviton 1/2/3/4)
+  # Reference: https://aws.amazon.com/ec2/instance-types/
+  arm_instance_prefixes = [
+    # General Purpose
+    "a1",          # Graviton (1st gen)
+    "t4g",         # Graviton2 burstable
+    "m6g", "m6gd", # Graviton2 general purpose
+    "m7g", "m7gd", # Graviton3 general purpose
+    "m8g",         # Graviton4 general purpose
+    # Compute Optimized
+    "c6g", "c6gd", "c6gn", # Graviton2 compute optimized
+    "c7g", "c7gd", "c7gn", # Graviton3 compute optimized
+    "c8g", "c8gn",         # Graviton4 compute optimized
+    # Memory Optimized
+    "r6g", "r6gd", # Graviton2 memory optimized
+    "r7g", "r7gd", # Graviton3 memory optimized
+    "r8g",         # Graviton4 memory optimized
+    "x2gd",        # Graviton2 high memory
+    # Storage Optimized (important for ClickHouse workloads)
+    "i4g",         # Graviton2 storage optimized
+    "im4gn",       # Graviton2 storage optimized (NVMe)
+    "is4gen",      # Graviton2 storage optimized (NVMe)
+    "i8g", "i8ge", # Graviton4 storage optimized
+    # Accelerated Computing
+    "g5g",  # Graviton2 GPU instances
+    "hpc7g" # Graviton3E HPC optimized
+  ]
+
   node_pool_defaults = {
-    ami_type     = var.default_ami_type
+    ami_type_x86 = var.default_ami_type
+    ami_type_arm = var.default_ami_type_arm
     disk_size    = 20
     desired_size = 1
     max_size     = 10
@@ -49,7 +79,13 @@ locals {
           max_size  = np.max_size != null ? np.max_size : local.node_pool_defaults.max_size
           min_size  = np.min_size != null ? np.min_size : local.node_pool_defaults.min_size
           disk_size = np.disk_size != null ? np.disk_size : local.node_pool_defaults.disk_size
-          ami_type  = np.ami_type != null ? np.ami_type : local.node_pool_defaults.ami_type
+
+          # Automatically detect ARM-based instances and use appropriate AMI type
+          ami_type = np.ami_type != null ? np.ami_type : (
+            contains([for prefix in local.arm_instance_prefixes : prefix if startswith(np.instance_type, prefix)], split(".", np.instance_type)[0]) ?
+            local.node_pool_defaults.ami_type_arm :
+            local.node_pool_defaults.ami_type_x86
+          )
         }
       ]
     ]

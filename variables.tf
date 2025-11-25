@@ -107,9 +107,15 @@ variable "eks_autoscaler_version" {
 }
 
 variable "eks_default_ami_type" {
-  description = "Default AMI type for EKS node groups"
+  description = "Default AMI type for x86_64 EKS node groups"
   type        = string
   default     = "AL2023_x86_64_STANDARD"
+}
+
+variable "eks_default_ami_type_arm" {
+  description = "Default AMI type for ARM64 EKS node groups"
+  type        = string
+  default     = "AL2023_ARM_64_STANDARD"
 }
 
 variable "eks_autoscaler_replicas" {

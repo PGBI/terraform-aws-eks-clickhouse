@@ -122,6 +122,7 @@ module "eks_clickhouse" {
 For comprehensive examples covering different configurations and use cases, see the [examples directory](examples/):
 
 - **Default**: Complete EKS cluster with ClickHouse operator and cluster
+- **ARM/Graviton**: Configuration using AWS Graviton (ARM64) instances for cost optimization
 - **EKS Cluster Only**: Just the EKS infrastructure without ClickHouse components
 - **Public Load Balancer**: Configuration with external access via load balancer
 - **Public Subnets Only**: Simplified networking setup for development
@@ -181,6 +182,26 @@ Key configuration options include:
 - **Node Pools**: Instance types, scaling configuration, zone distribution
 - **ClickHouse**: Operator installation, cluster deployment, load balancer configuration
 - **Networking**: Public/private subnets, security groups, load balancer settings
+- **AMI Types**: Automatic architecture detection for x86_64 and ARM64 (Graviton) instances
+
+### ARM/Graviton Instance Support
+
+The module automatically detects ARM-based AWS Graviton instances and assigns the correct AMI type. All Graviton families are supported, including storage-optimized instances ideal for ClickHouse:
+
+- **General Purpose**: a1, t4g, m6g/m7g/m8g
+- **Compute Optimized**: c6g/c7g/c8g (and variants)
+- **Memory Optimized**: r6g/r7g/r8g, x2gd
+- **Storage Optimized**: i4g, im4gn, is4gen, i8g/i8ge *(recommended for ClickHouse)*
+- **Accelerated**: g5g, hpc7g
+
+To customize AMI types:
+
+```hcl
+eks_default_ami_type     = "AL2023_x86_64_STANDARD"  # For x86_64 instances
+eks_default_ami_type_arm = "AL2023_ARM_64_STANDARD"  # For ARM64 instances
+```
+
+See the [ARM/Graviton example](examples/arm-graviton/) for a complete configuration.
 
 For detailed configuration options, see the [Terraform Registry documentation](https://registry.terraform.io/modules/Altinity/eks-clickhouse/aws/latest).
 

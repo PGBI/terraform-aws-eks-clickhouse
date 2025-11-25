@@ -16,7 +16,7 @@ module "eks_clickhouse" {
   # Set to true if you want to use a public load balancer (and expose ports to the public Internet)
   clickhouse_cluster_enable_loadbalancer = false
 
-  eks_cluster_name = "clickhouse-cluster"
+  eks_cluster_name = "clickhouse-cluster-arm"
   eks_region       = local.region
   eks_cidr         = "10.0.0.0/16"
 
@@ -36,15 +36,17 @@ module "eks_clickhouse" {
     "10.0.103.0/24"
   ]
 
-  # Optional: Customize AMI types for x86_64 and ARM64 instances
-  # eks_default_ami_type     = "AL2023_x86_64_STANDARD"  # Default for x86_64 instances
-  # eks_default_ami_type_arm = "AL2023_ARM_64_STANDARD"  # Default for ARM64 instances (t4g, m7g, etc.)
+  # Configure AMI types (optional - these are the defaults)
+  eks_default_ami_type     = "AL2023_x86_64_STANDARD" # For x86_64 instances
+  eks_default_ami_type_arm = "AL2023_ARM_64_STANDARD" # For ARM64 instances
 
+  # Example using AWS Graviton (ARM) instances
+  # Storage-optimized instances (i4g, im4gn, is4gen) are ideal for ClickHouse workloads
   # ⚠️ The instance type of `eks_node_pools` at index `0` will be used for setting up the clickhouse cluster replicas.
   eks_node_pools = [
     {
       name          = "clickhouse"
-      instance_type = "m6i.large"
+      instance_type = "im4gn.large" # Graviton2 storage-optimized with NVMe (ideal for ClickHouse)
       desired_size  = 0
       max_size      = 10
       min_size      = 0
@@ -52,7 +54,7 @@ module "eks_clickhouse" {
     },
     {
       name          = "system"
-      instance_type = "t3.large"
+      instance_type = "t4g.large" # Graviton2 burstable (cost-effective for system workloads)
       desired_size  = 1
       max_size      = 10
       min_size      = 0
@@ -61,10 +63,12 @@ module "eks_clickhouse" {
   ]
 
   eks_tags = {
-    CreatedBy = "mr-robot"
+    CreatedBy    = "terraform"
+    Architecture = "arm64"
   }
 }
 
 output "eks_configure_kubectl" {
   value = module.eks_clickhouse.eks_configure_kubectl
 }
+

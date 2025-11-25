@@ -80,9 +80,15 @@ variable "autoscaler_version" {
 }
 
 variable "default_ami_type" {
-  description = "Default AMI type for node groups"
+  description = "Default AMI type for x86_64 node groups"
   type        = string
   default     = "AL2023_x86_64_STANDARD"
+}
+
+variable "default_ami_type_arm" {
+  description = "Default AMI type for ARM64 node groups"
+  type        = string
+  default     = "AL2023_ARM_64_STANDARD"
 }
 
 variable "autoscaler_replicas" {
