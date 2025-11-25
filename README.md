@@ -27,11 +27,11 @@ Before using this module, ensure you have:
 
 ## Usage
 ###  Compatibility Notice
-⚠️ This module is not yet compatible with the latest versions of the following providers:
+⚠️ The underlying AWS EKS Blueprints module is not yet compatible with the latest versions of the following providers:
   - AWS Provider v6.x.x
   - Helm Provider v3.x.x
 
-> Please use supported versions until compatibility updates are released. Contributions are welcome 🙌
+> Please use supported versions until compatibility updates are released.
 
 
 ### Basic Setup
