@@ -154,6 +154,7 @@ module "eks" {
   cluster_endpoint_private_access      = true
   cluster_endpoint_public_access       = true
   cluster_endpoint_public_access_cidrs = var.public_access_cidrs
+  cluster_enabled_log_types            = var.enabled_log_types
 
   tags = var.tags
 }
